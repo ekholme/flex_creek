@@ -9,12 +9,14 @@ type Wod struct {
 	Length      int64  `json:"length"`
 	Description string `json:"description"`
 	Difficulty  int64  `json:"difficulty"`
+	AddedBy     string `json:"addedby"`
 }
 
 type WodService interface {
 	CreateWod(ctx context.Context, w *Wod) error
 	GetAllWods(ctx context.Context) ([]*Wod, error)
 	GetRandomWod(ctx context.Context) (*Wod, error)
+	GetWodByID(ctx context.Context, id string) (*Wod, error)
 	UpdateWod(ctx context.Context, id string) (*Wod, error)
 	DeleteWod(ctx context.Context, id string) error
 }
