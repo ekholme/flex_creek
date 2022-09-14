@@ -1,6 +1,8 @@
 package server
 
 import (
+	"net/http"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,6 +23,7 @@ func NewServer(router *gin.Engine, wh WodHandler) *Server {
 func (s *Server) handleIndex(c *gin.Context) {
 	//add handle index here
 	//may be a better way if we're just serving static files, though
+	c.JSON(http.StatusOK, gin.H{"hello": "friend"})
 }
 
 func (s *Server) Run() {

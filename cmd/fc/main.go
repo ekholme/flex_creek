@@ -1,21 +1,24 @@
 package main
 
 import (
-	"net/http"
-
+	"github.com/ekholme/flex_creek/frstr"
+	"github.com/ekholme/flex_creek/server"
 	"github.com/gin-gonic/gin"
 )
 
-//placeholder stuff for now
-
 func main() {
 
-	r := gin.Default()
+	//maybe better to not do all of this in main.go? but it doesn't seem too bad for now
 
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"msg": "Hello World"})
-	})
+	//create router
+	router := gin.Default()
 
-	r.Run(":8080")
+	//create wodservice & wodhandler
+	ws := frstr.NewWodService()
+	wh := server.NewWodHandler(ws)
+
+	s := server.NewServer(router, wh)
+
+	s.Run()
 
 }

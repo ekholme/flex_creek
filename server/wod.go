@@ -49,10 +49,10 @@ func (s *Server) registerWodRoutes() {
 func (wh wodHandler) CreateWod(c *gin.Context) {
 	ctx := context.Background()
 
-	var w *flexcreek.Wod
+	var wod *flexcreek.Wod
 
 	//will pull data from a form eventually; this is sort of a placeholder
-	err := c.ShouldBindJSON(&w)
+	err := c.ShouldBindJSON(&wod)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
@@ -62,12 +62,12 @@ func (wh wodHandler) CreateWod(c *gin.Context) {
 	//need to create an ID bc the form we pull this from won't do this by default
 	id := uuid.New().String()
 
-	w.ID = id
+	wod.ID = id
 
-	err = wh.wodService.CreateWod(ctx, w)
+	err = wh.wodService.CreateWod(ctx, wod)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
 		return
 	}
 
@@ -75,17 +75,60 @@ func (wh wodHandler) CreateWod(c *gin.Context) {
 }
 
 func (wh wodHandler) GetAllWods(c *gin.Context) {
-	//start here prob
+	ctx := context.Background()
+
+	wods, err := wh.wodService.GetAllWods(ctx)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	data := gin.H{
+		"wods": wods,
+	}
+
+	c.JSON(http.StatusOK, data)
+
 }
 
 func (wh wodHandler) GetRandomWod(c *gin.Context) {
+	ctx := context.Background()
 
+	wod, err := wh.wodService.GetRandomWod(ctx)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	data := gin.H{
+		"wod": wod,
+	}
+
+	c.JSON(http.StatusOK, data)
 }
 
 func (wh wodHandler) GetWodByID(c *gin.Context) {
+	ctx := context.Background()
 
+	id := c.Param("id")
+
+	wod, err := wh.wodService.GetWodByID(ctx, id)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"message": err.Error()})
+		return
+	}
+
+	data := gin.H{
+		"wod": wod,
+	}
+
+	c.JSON(http.StatusOK, data)
 }
 
+//TODO
 func (wh wodHandler) UpdateWod(c *gin.Context) {
 
 }
