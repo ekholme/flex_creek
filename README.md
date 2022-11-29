@@ -1,3 +1,3 @@
 # Flex Creek
 
-An app to track workouts that the FitzCrew likes
+A lightweight app to create workouts, track workouts we like, and recommend workouts.
