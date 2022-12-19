@@ -1,8 +1,12 @@
 package server
 
 import (
+	"context"
 	"encoding/json"
 	"net/http"
+
+	flexcreek "github.com/ekholme/flex_creek"
+	"github.com/google/uuid"
 )
 
 //TODO
@@ -22,6 +26,34 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 }
 
 // handler for wod creation
-func handleCreateWod(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCreateWod(w http.ResponseWriter, r *http.Request) {
+	//making a generic context for now, although this could be something different later
+
+	ctx := context.Background()
+
+	var wod *flexcreek.Wod
+
+	err := json.NewDecoder(r.Body).Decode(&wod)
+
+	if err != nil {
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	id := uuid.New().String()
+
+	wod.ID = id
+
+	err = s.WodService.CreateWod(ctx, wod)
+
+	if err != nil {
+		json.NewEncoder(w).Encode(err)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	json.NewEncoder(w).Encode(wod)
 
 }

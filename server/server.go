@@ -26,4 +26,6 @@ func NewServer(r *mux.Router, ws flexcreek.WodService, us flexcreek.UserService)
 	}
 }
 
+//add Register Routes method
+
 //add Run method
