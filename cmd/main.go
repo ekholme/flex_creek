@@ -12,6 +12,8 @@ const listenAddr string = ":8080"
 
 // just a little hello world
 func main() {
+
+	//need to add defer client.Close() somewhere for firestore client
 	r := mux.NewRouter()
 
 	r.HandleFunc("/", indexHandler).Methods("GET")
