@@ -55,9 +55,36 @@ func (ws wodService) GetAllWods(ctx context.Context) ([]*flexcreek.Wod, error) {
 	return wods, nil
 }
 
+func (ws wodService) GetWodsbyType(ctx context.Context, t string) ([]*flexcreek.Wod, error) {
+
+	iter := ws.Client.Collection(wodColl).Where("Type", "==", t).Documents(ctx)
+
+	defer iter.Stop()
+
+	var wods []*flexcreek.Wod
+
+	for {
+		doc, err := iter.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+
+		var wod *flexcreek.Wod
+
+		doc.DataTo(&wod)
+
+		wods = append(wods, wod)
+	}
+
+	return wods, nil
+}
+
 func (ws wodService) GetWodByID(ctx context.Context, id string) (*flexcreek.Wod, error) {
 
-	iter := ws.Client.Collection(wodColl).Limit(1).Documents(ctx)
+	iter := ws.Client.Collection(wodColl).Where("ID", "==", id).Limit(1).Documents(ctx)
 
 	defer iter.Stop()
 
@@ -106,11 +133,57 @@ func (ws wodService) GetRandomWod(ctx context.Context) (*flexcreek.Wod, error) {
 	return wod, nil
 }
 
-// TODO
-func (ws wodService) UpdateWod(ctx context.Context, id string) (*flexcreek.Wod, error) {
-	return nil, nil
+func (ws wodService) UpdateWod(ctx context.Context, id string, w *flexcreek.Wod) (*flexcreek.Wod, error) {
+
+	ref, err := getFirestoreDocId(ws, ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	w.ID = id
+
+	//set() will overwrite, and I think this is what I want right now?
+	_, err = ws.Client.Collection(wodColl).Doc(ref).Set(ctx, w)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return w, nil
 }
 
 func (ws wodService) DeleteWod(ctx context.Context, id string) error {
+	ref, err := getFirestoreDocId(ws, ctx, id)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = ws.Client.Doc(ref).Delete(ctx)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// helper
+func getFirestoreDocId(ws wodService, ctx context.Context, id string) (string, error) {
+
+	iter := ws.Client.Collection(wodColl).Where("ID", "==", id).Limit(1).Documents(ctx)
+
+	defer iter.Stop()
+
+	doc, err := iter.Next()
+
+	if err != nil {
+		return "", err
+	}
+
+	//get the firestore id of the document
+	ref := doc.Ref.ID
+
+	return ref, nil
 }

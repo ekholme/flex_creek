@@ -6,11 +6,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// just a little hello world
 func main() {
-	//add defer client.Close here somewhere
 
 	client := frstr.NewClient()
+
+	defer client.Close()
+
 	ws := frstr.NewWodService(client)
 	r := mux.NewRouter()
 
