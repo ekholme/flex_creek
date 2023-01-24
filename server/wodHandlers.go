@@ -90,9 +90,76 @@ func (s *Server) handleGetWodbyID(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		writeJSON(w, http.StatusInternalServerError, err)
+		return
 	}
 
 	writeJSON(w, http.StatusOK, wod)
+}
+
+func (s *Server) handleGetWodbyType(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	vars := mux.Vars(r)
+
+	t := vars["wodType"]
+
+	wods, err := s.WodService.GetWodsbyType(ctx, t)
+
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, wods)
+}
+
+func (s *Server) handleUpdateWod(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	vars := mux.Vars(r)
+
+	id := vars["wodID"]
+
+	var wod *flexcreek.Wod
+
+	err := json.NewDecoder(r.Body).Decode(&wod)
+
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	uWod, err := s.WodService.UpdateWod(ctx, id, wod)
+
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, uWod)
+
+}
+
+func (s *Server) handleDeleteWod(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	vars := mux.Vars(r)
+
+	id := vars["wodID"]
+
+	err := s.WodService.DeleteWod(ctx, id)
+
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	msg := make(map[string]string)
+
+	msg["message"] = "Wod Deleted"
+
+	writeJSON(w, http.StatusOK, msg)
+
 }
 
 // helper funcs

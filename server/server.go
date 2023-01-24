@@ -31,11 +31,17 @@ func NewServer(r *mux.Router, ws flexcreek.WodService, us flexcreek.UserService)
 
 // add Register Routes method
 func (s *Server) registerRoutes() {
+	//index
 	s.Router.HandleFunc("/", handleIndex).Methods("GET")
+
+	//wod handlers
 	s.Router.HandleFunc("/wod", s.handleCreateWod).Methods("POST")
 	s.Router.HandleFunc("/wod", s.handleGetAllWods).Methods("GET")
 	s.Router.HandleFunc("/randomwod", s.handleGetRandomWod).Methods("GET")
 	s.Router.HandleFunc("/wod/{wodID}", s.handleGetWodbyID).Methods("GET")
+	s.Router.HandleFunc("/wod/type/{wodType}", s.handleGetWodbyType).Methods("GET")
+	s.Router.HandleFunc("/wod/update/{wodID}", s.handleUpdateWod).Methods("POST")
+	s.Router.HandleFunc("/wod/delete/{wodID}", s.handleDeleteWod).Methods("DELETE")
 }
 
 // add Run method
