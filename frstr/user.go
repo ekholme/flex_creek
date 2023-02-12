@@ -75,16 +75,13 @@ func (us userService) GetUserByID(ctx context.Context, id string) (*flexcreek.Us
 	return user, nil
 }
 
+// this is all todo
 func (us userService) UpdateUser(ctx context.Context, id string, u *flexcreek.User) (*flexcreek.User, error) {
 	return nil, nil
 }
 
 func (us userService) DeleteUser(ctx context.Context, id string) error {
 	return nil
-}
-
-func (us userService) GetUserFavoriteWods(ctx context.Context, id string) ([]*flexcreek.Wod, error) {
-	return nil, nil
 }
 
 // this probably isn't correct
