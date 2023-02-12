@@ -55,7 +55,24 @@ func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error
 }
 
 func (us userService) GetUserByID(ctx context.Context, id string) (*flexcreek.User, error) {
-	return nil, nil
+
+	ref, err := getFirestoreDocId(us.Client.Collection(userColl), ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var user *flexcreek.User
+
+	doc, err := us.Client.Collection(userColl).Doc(ref).Get(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+
+	doc.DataTo(&user)
+
+	return user, nil
 }
 
 func (us userService) UpdateUser(ctx context.Context, id string, u *flexcreek.User) (*flexcreek.User, error) {

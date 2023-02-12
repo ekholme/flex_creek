@@ -84,17 +84,19 @@ func (ws wodService) GetWodsbyType(ctx context.Context, t string) ([]*flexcreek.
 
 func (ws wodService) GetWodByID(ctx context.Context, id string) (*flexcreek.Wod, error) {
 
-	iter := ws.Client.Collection(wodColl).Where("ID", "==", id).Limit(1).Documents(ctx)
-
-	defer iter.Stop()
-
-	doc, err := iter.Next()
+	ref, err := getFirestoreDocId(ws.Client.Collection(wodColl), ctx, id)
 
 	if err != nil {
 		return nil, err
 	}
 
 	var wod *flexcreek.Wod
+
+	doc, err := ws.Client.Collection(wodColl).Doc(ref).Get(ctx)
+
+	if err != nil {
+		return nil, err
+	}
 
 	doc.DataTo(&wod)
 
@@ -135,7 +137,7 @@ func (ws wodService) GetRandomWod(ctx context.Context) (*flexcreek.Wod, error) {
 
 func (ws wodService) UpdateWod(ctx context.Context, id string, w *flexcreek.Wod) (*flexcreek.Wod, error) {
 
-	ref, err := getFirestoreDocId(ws, ctx, id)
+	ref, err := getFirestoreDocId(ws.Client.Collection(wodColl), ctx, id)
 
 	if err != nil {
 		return nil, err
@@ -154,7 +156,7 @@ func (ws wodService) UpdateWod(ctx context.Context, id string, w *flexcreek.Wod)
 }
 
 func (ws wodService) DeleteWod(ctx context.Context, id string) error {
-	ref, err := getFirestoreDocId(ws, ctx, id)
+	ref, err := getFirestoreDocId(ws.Client.Collection(wodColl), ctx, id)
 
 	if err != nil {
 		return err
@@ -167,23 +169,4 @@ func (ws wodService) DeleteWod(ctx context.Context, id string) error {
 	}
 
 	return nil
-}
-
-// helper
-func getFirestoreDocId(ws wodService, ctx context.Context, id string) (string, error) {
-
-	iter := ws.Client.Collection(wodColl).Where("ID", "==", id).Limit(1).Documents(ctx)
-
-	defer iter.Stop()
-
-	doc, err := iter.Next()
-
-	if err != nil {
-		return "", err
-	}
-
-	//get the firestore id of the document
-	ref := doc.Ref.ID
-
-	return ref, nil
 }

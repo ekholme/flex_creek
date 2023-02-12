@@ -22,3 +22,22 @@ func NewClient() *firestore.Client {
 
 	return client
 }
+
+// helper func to get firestore doc id
+func getFirestoreDocId(cr *firestore.CollectionRef, ctx context.Context, id string) (string, error) {
+	iter := cr.Where("ID", "==", id).Limit(1).Documents(ctx)
+
+	defer iter.Stop()
+
+	doc, err := iter.Next()
+
+	if err != nil {
+		return "", err
+	}
+
+	//get the firestore id of the document
+	ref := doc.Ref.ID
+
+	return ref, nil
+
+}
