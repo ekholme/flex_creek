@@ -161,13 +161,3 @@ func (s *Server) handleDeleteWod(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, msg)
 
 }
-
-// helper funcs
-func writeJSON(w http.ResponseWriter, statusCode int, v any) {
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-
-	json.NewEncoder(w).Encode(v)
-
-}

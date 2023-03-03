@@ -1,6 +1,7 @@
 package server
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
@@ -42,6 +43,9 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/wod/type/{wodType}", s.handleGetWodbyType).Methods("GET")
 	s.Router.HandleFunc("/wod/update/{wodID}", s.handleUpdateWod).Methods("POST")
 	s.Router.HandleFunc("/wod/delete/{wodID}", s.handleDeleteWod).Methods("DELETE")
+
+	//user handlers
+	s.Router.HandleFunc("/user", s.handleCreateUser).Methods("POST")
 }
 
 // add Run method
@@ -54,4 +58,14 @@ func (s *Server) Run() {
 	s.Srvr.Handler = s.Router
 
 	s.Srvr.ListenAndServe()
+}
+
+// helpers
+func writeJSON(w http.ResponseWriter, statusCode int, v any) {
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+
+	json.NewEncoder(w).Encode(v)
+
 }

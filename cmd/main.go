@@ -13,9 +13,10 @@ func main() {
 	defer client.Close()
 
 	ws := frstr.NewWodService(client)
+	us := frstr.NewUserService(client)
 	r := mux.NewRouter()
 
-	s := server.NewServer(r, ws, nil)
+	s := server.NewServer(r, ws, us)
 
 	s.Run()
 }
