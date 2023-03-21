@@ -30,6 +30,15 @@ func NewServer(r *mux.Router, ws flexcreek.WodService, us flexcreek.UserService)
 	}
 }
 
+// function to handle the index route
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	msg := make(map[string]string)
+
+	msg["msg"] = "Welcome to Flex Creek!"
+
+	writeJSON(w, http.StatusOK, msg)
+}
+
 // add Register Routes method
 func (s *Server) registerRoutes() {
 	//index

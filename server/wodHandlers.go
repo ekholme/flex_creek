@@ -10,19 +10,6 @@ import (
 	"github.com/gorilla/mux"
 )
 
-//TODO
-//write handlers
-//note that these will be JSON to begin but eventually I want to use html templates
-
-// handler for the index
-func handleIndex(w http.ResponseWriter, r *http.Request) {
-	msg := make(map[string]string)
-
-	msg["msg"] = "Welcome to Flex Creek!"
-
-	writeJSON(w, http.StatusOK, msg)
-}
-
 // handler for wod creation
 func (s *Server) handleCreateWod(w http.ResponseWriter, r *http.Request) {
 	//making a generic context for now, although this could be something different later

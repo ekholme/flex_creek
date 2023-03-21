@@ -7,9 +7,6 @@ import (
 	flexcreek "github.com/ekholme/flex_creek"
 )
 
-//TODO
-//implement UserService methods
-
 const userColl = "users"
 
 type userService struct {
@@ -35,7 +32,8 @@ func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) error {
 
 func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error) {
 
-	var users []*flexcreek.User
+	//use make() instead for allocations
+	// var users []*flexcreek.User
 
 	docs, err := us.Client.Collection(userColl).Documents(ctx).GetAll()
 
@@ -43,12 +41,14 @@ func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error
 		return nil, err
 	}
 
-	for _, v := range docs {
+	users := make([]*flexcreek.User, len(docs))
+
+	for i, v := range docs {
 		var user *flexcreek.User
 
 		v.DataTo(&user)
 
-		users = append(users, user)
+		users[i] = user
 	}
 
 	return users, nil
@@ -75,16 +75,38 @@ func (us userService) GetUserByID(ctx context.Context, id string) (*flexcreek.Us
 	return user, nil
 }
 
-// this is all todo
 func (us userService) UpdateUser(ctx context.Context, id string, u *flexcreek.User) (*flexcreek.User, error) {
-	return nil, nil
+	ref, err := getFirestoreDocId(us.Client.Collection(userColl), ctx, id)
+
+	if err != nil {
+		return nil, err
+	}
+
+	u.ID = id
+
+	//i think this should work?
+	_, err = us.Client.Collection(userColl).Doc(ref).Set(ctx, u)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }
 
 func (us userService) DeleteUser(ctx context.Context, id string) error {
-	return nil
-}
+	ref, err := getFirestoreDocId(us.Client.Collection(userColl), ctx, id)
 
-// this probably isn't correct
-func (us userService) Login(ctx context.Context, username string, pw string) (*flexcreek.User, error) {
-	return nil, nil
+	if err != nil {
+		return err
+	}
+
+	_, err = us.Client.Collection(userColl).Doc(ref).Delete(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	//I don't think this should return anything -- I can propogate a generic message via the handler if the error is nil
+	return nil
 }

@@ -162,7 +162,7 @@ func (ws wodService) DeleteWod(ctx context.Context, id string) error {
 		return err
 	}
 
-	_, err = ws.Client.Doc(ref).Delete(ctx)
+	_, err = ws.Client.Collection(wodColl).Doc(ref).Delete(ctx)
 
 	if err != nil {
 		return err

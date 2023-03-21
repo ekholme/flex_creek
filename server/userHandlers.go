@@ -7,6 +7,7 @@ import (
 
 	flexcreek "github.com/ekholme/flex_creek"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
@@ -35,4 +36,39 @@ func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, user)
 }
 
-//RESUME HERE
+func (s *Server) handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	users, err := s.UserService.GetAllUsers(ctx)
+
+	if err != nil {
+		writeJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, users)
+}
+
+func (s *Server) handleGetUserByID(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	id := mux.Vars(r)["userID"]
+
+	user, err := s.UserService.GetUserByID(ctx, id)
+
+	if err != nil {
+		writeJSON(w, http.StatusNotFound, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, user)
+}
+
+// TODO
+func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
+
+}
