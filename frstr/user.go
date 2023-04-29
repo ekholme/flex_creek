@@ -5,6 +5,7 @@ import (
 
 	"cloud.google.com/go/firestore"
 	flexcreek "github.com/ekholme/flex_creek"
+	"golang.org/x/crypto/bcrypt"
 )
 
 const userColl = "users"
@@ -21,7 +22,12 @@ func NewUserService(client *firestore.Client) flexcreek.UserService {
 
 // add methods
 func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) error {
-	_, _, err := us.Client.Collection(userColl).Add(ctx, u)
+	err := hashPw(u)
+
+	if err != nil {
+		return err
+	}
+	_, _, err = us.Client.Collection(userColl).Add(ctx, u)
 
 	if err != nil {
 		return err
@@ -31,9 +37,6 @@ func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) error {
 }
 
 func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error) {
-
-	//use make() instead for allocations
-	// var users []*flexcreek.User
 
 	docs, err := us.Client.Collection(userColl).Documents(ctx).GetAll()
 
@@ -108,5 +111,18 @@ func (us userService) DeleteUser(ctx context.Context, id string) error {
 	}
 
 	//I don't think this should return anything -- I can propogate a generic message via the handler if the error is nil
+	return nil
+}
+
+// util function to hash a password
+func hashPw(u *flexcreek.User) error {
+	p, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
+
+	if err != nil {
+		return err
+	}
+
+	u.Password = string(p)
+
 	return nil
 }
