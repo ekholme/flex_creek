@@ -3,30 +3,89 @@ package frstr
 import (
 	"context"
 
-	firestore "cloud.google.com/go/firestore/apiv1"
+	firestore "cloud.google.com/go/firestore"
 	flexcreek "github.com/ekholme/flex_creek"
 )
 
-type favoriteWodsService struct {
-	client *firestore.Client
+const favColl = "favoriteWods"
+
+type favoriteService struct {
+	Client *firestore.Client
 }
 
-func NewFavoriteWodsService(c *firestore.Client) flexcreek.FavoriteWodsService {
-	return &favoriteWodsService{
-		client: c,
+func NewFavoriteService(client *firestore.Client) flexcreek.FavoriteService {
+	return &favoriteService{
+		Client: client,
 	}
 }
 
 //methods
 
-func (fs favoriteWodsService) CreateFavoriteWod(ctx context.Context, userId string, w *flexcreek.Wod) error {
+func (fs favoriteService) CreateFavoriteWod(ctx context.Context, userId string, wod *flexcreek.Wod) error {
+
+	ref, err := getFirestoreDocId(fs.Client.Collection(userColl), ctx, userId)
+
+	if err != nil {
+		return err
+	}
+
+	_, _, err = fs.Client.Collection(userColl).Doc(ref).Collection(favColl).Add(ctx, wod)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (fs favoriteWodsService) DeleteFavoriteWod(ctx context.Context, userId string, wodId string) error {
+func (fs favoriteService) DeleteFavoriteWod(ctx context.Context, userId string, wodId string) error {
+
+	//i feel like there should be a more straightforward way to do this?
+	uref, err := getFirestoreDocId(fs.Client.Collection(userColl), ctx, userId)
+
+	if err != nil {
+		return err
+	}
+
+	wref, err := getFirestoreDocId(fs.Client.Collection(userColl).Doc(uref).Collection(favColl), ctx, wodId)
+
+	if err != nil {
+		return err
+	}
+
+	_, err = fs.Client.Collection(userColl).Doc(uref).Collection(favColl).Doc(wref).Delete(ctx)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func (fs favoriteWodsService) GetAllFavoriteWods(ctx context.Context, userId string) ([]*flexcreek.Wod, error) {
-	return nil, nil
+func (fs favoriteService) GetAllFavoriteWods(ctx context.Context, userId string) ([]*flexcreek.Wod, error) {
+
+	uref, err := getFirestoreDocId(fs.Client.Collection(userColl), ctx, userId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	docs, err := fs.Client.Collection(userColl).Doc(uref).Collection(favColl).Documents(ctx).GetAll()
+
+	if err != nil {
+		return nil, err
+	}
+
+	wods := make([]*flexcreek.Wod, len(docs))
+
+	for i, doc := range docs {
+		var wod *flexcreek.Wod
+
+		doc.DataTo(&wod)
+
+		wods[i] = wod
+	}
+
+	return wods, nil
+
 }
