@@ -76,7 +76,7 @@ func (s *Server) handleGetWodbyID(w http.ResponseWriter, r *http.Request) {
 	wod, err := s.WodService.GetWodByID(ctx, id)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		writeJSON(w, http.StatusNotFound, err)
 		return
 	}
 

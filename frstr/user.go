@@ -78,6 +78,26 @@ func (us userService) GetUserByID(ctx context.Context, id string) (*flexcreek.Us
 	return user, nil
 }
 
+func (us userService) GetUserByUsername(ctx context.Context, username string) (*flexcreek.User, error) {
+
+	iter := us.Client.Collection(userColl).Where("Username", "==", username).Limit(1).Documents(ctx)
+
+	defer iter.Stop()
+
+	doc, err := iter.Next()
+
+	if err != nil {
+		return nil, err
+	}
+
+	var u *flexcreek.User
+
+	doc.DataTo(&u)
+
+	return u, nil
+
+}
+
 func (us userService) UpdateUser(ctx context.Context, id string, u *flexcreek.User) (*flexcreek.User, error) {
 	ref, err := getFirestoreDocId(us.Client.Collection(userColl), ctx, id)
 

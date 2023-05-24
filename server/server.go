@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	flexcreek "github.com/ekholme/flex_creek"
+	"github.com/ekholme/flex_creek/middleware"
 	"github.com/gorilla/mux"
 )
 
@@ -55,6 +56,10 @@ func (s *Server) registerRoutes() {
 
 	//user handlers
 	s.Router.HandleFunc("/user", s.handleCreateUser).Methods("POST")
+	s.Router.HandleFunc("/login", s.handleLogin).Methods("POST")
+
+	//welcome
+	s.Router.HandleFunc("/o/welcome", middleware.JWTMiddleware(s.handleWelcome)).Methods("GET")
 }
 
 // add Run method
