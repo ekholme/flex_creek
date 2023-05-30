@@ -132,6 +132,7 @@ func (s *Server) handleWelcome(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, msg)
 }
 
+// helper to ensure passwords match
 func validateLogin(l *flexcreek.Login, u *flexcreek.User) error {
 
 	err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(l.Password))

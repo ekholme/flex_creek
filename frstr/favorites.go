@@ -7,7 +7,7 @@ import (
 	flexcreek "github.com/ekholme/flex_creek"
 )
 
-const favColl = "favoriteWods"
+const favColl = "FavoriteWods"
 
 type favoriteService struct {
 	Client *firestore.Client

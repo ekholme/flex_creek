@@ -22,9 +22,10 @@ func main() {
 
 	ws := frstr.NewWodService(client)
 	us := frstr.NewUserService(client)
+	fs := frstr.NewFavoriteService(client)
 	r := mux.NewRouter()
 
-	s := server.NewServer(r, ws, us)
+	s := server.NewServer(r, ws, us, fs)
 
 	s.Run()
 }

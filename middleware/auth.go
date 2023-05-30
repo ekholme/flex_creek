@@ -81,7 +81,7 @@ func ValidateJWT(tokenStr string) (*jwt.Token, error) {
 	return tkn, nil
 }
 
-// RESUME WITH ACTUAL MIDDLEWARE WRAPPER
+// middleware that authenticates the user
 func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("FLEXAUTH")

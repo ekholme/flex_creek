@@ -11,13 +11,14 @@ import (
 )
 
 type Server struct {
-	Router      *mux.Router
-	Srvr        *http.Server
-	WodService  flexcreek.WodService
-	UserService flexcreek.UserService
+	Router          *mux.Router
+	Srvr            *http.Server
+	WodService      flexcreek.WodService
+	UserService     flexcreek.UserService
+	FavoriteService flexcreek.FavoriteService
 }
 
-func NewServer(r *mux.Router, ws flexcreek.WodService, us flexcreek.UserService) *Server {
+func NewServer(r *mux.Router, ws flexcreek.WodService, us flexcreek.UserService, fs flexcreek.FavoriteService) *Server {
 
 	listenAddr := ":8080"
 
@@ -26,8 +27,9 @@ func NewServer(r *mux.Router, ws flexcreek.WodService, us flexcreek.UserService)
 		Srvr: &http.Server{
 			Addr: listenAddr,
 		},
-		WodService:  ws,
-		UserService: us,
+		WodService:      ws,
+		UserService:     us,
+		FavoriteService: fs,
 	}
 }
 
@@ -57,9 +59,15 @@ func (s *Server) registerRoutes() {
 	//user handlers
 	s.Router.HandleFunc("/user", s.handleCreateUser).Methods("POST")
 	s.Router.HandleFunc("/login", s.handleLogin).Methods("POST")
+	s.Router.HandleFunc("/user/{userID}", s.handleGetUserByID).Methods("GET")
+	s.Router.HandleFunc("/users", s.handleGetAllUsers).Methods("GET")
 
 	//welcome
 	s.Router.HandleFunc("/o/welcome", middleware.JWTMiddleware(s.handleWelcome)).Methods("GET")
+
+	//favorites
+	s.Router.HandleFunc("/wod/{wodID}/favorite", middleware.JWTMiddleware(s.handleCreateFavorite)).Methods("POST")
+	//TODO -- ADD GET ALL FAVORITES TO CHECK THAT THIS IS WORKING
 }
 
 // add Run method
