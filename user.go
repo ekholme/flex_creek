@@ -4,11 +4,10 @@ import "context"
 
 // other fields to include?
 type User struct {
-	ID           string `json:"id"`
-	Username     string `json:"username" binding:"required"`
-	Password     string `json:"password" binding:"required"`
-	Email        string `json:"email" validate:"email" binding:"required"`
-	FavoriteWods []*Wod `json:"favoriteWods"`
+	ID       string `json:"id"`
+	Username string `json:"username" binding:"required"`
+	Password string `json:"password" binding:"required"`
+	Email    string `json:"email" validate:"email" binding:"required"`
 }
 
 type UserService interface {

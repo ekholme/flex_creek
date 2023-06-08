@@ -10,11 +10,6 @@ import (
 
 // handlers for favorite methods
 func (s *Server) handleCreateFavorite(w http.ResponseWriter, r *http.Request) {
-	//RESUME HERE
-	//i think i need to implement auth before i can do this, bc i'll want
-	//to grab the userid from a jwt and then pass that into the createFavorite
-	//method in the favoriteService
-	//then from there I can decode a json body with the wod
 
 	claims := r.Context().Value("flexclaims").(*middleware.CustomClaims)
 
@@ -45,8 +40,40 @@ func (s *Server) handleCreateFavorite(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) handleDeleteFavorite(w http.ResponseWriter, r *http.Request) {
 
+	claims := r.Context().Value("flexclaims").(*middleware.CustomClaims)
+
+	ctx := context.Background()
+
+	vars := mux.Vars(r)
+
+	wid := vars["wodID"]
+
+	err := s.FavoriteService.DeleteFavoriteWod(ctx, claims.UserID, wid)
+
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
+	//eventually might want to include the wod name in this msg to the user
+	msg := "wod removed from favorites"
+
+	writeJSON(w, http.StatusOK, msg)
 }
 
 func (s *Server) handleGetAllFavorites(w http.ResponseWriter, r *http.Request) {
+
+	claims := r.Context().Value("flexclaims").(*middleware.CustomClaims)
+
+	ctx := context.Background()
+
+	wods, err := s.FavoriteService.GetAllFavoriteWods(ctx, claims.UserID)
+
+	if err != nil {
+		writeJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
+	writeJSON(w, http.StatusOK, wods)
 
 }

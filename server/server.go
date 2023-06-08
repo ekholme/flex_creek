@@ -51,6 +51,7 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/wod", s.handleCreateWod).Methods("POST")
 	s.Router.HandleFunc("/wod", s.handleGetAllWods).Methods("GET")
 	s.Router.HandleFunc("/randomwod", s.handleGetRandomWod).Methods("GET")
+	//these routes are janky -- look into how people usually do this
 	s.Router.HandleFunc("/wod/{wodID}", s.handleGetWodbyID).Methods("GET")
 	s.Router.HandleFunc("/wod/type/{wodType}", s.handleGetWodbyType).Methods("GET")
 	s.Router.HandleFunc("/wod/update/{wodID}", s.handleUpdateWod).Methods("POST")
@@ -60,6 +61,7 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/user", s.handleCreateUser).Methods("POST")
 	s.Router.HandleFunc("/login", s.handleLogin).Methods("POST")
 	s.Router.HandleFunc("/user/{userID}", s.handleGetUserByID).Methods("GET")
+	//need to make this for admins only
 	s.Router.HandleFunc("/users", s.handleGetAllUsers).Methods("GET")
 
 	//welcome
@@ -67,7 +69,9 @@ func (s *Server) registerRoutes() {
 
 	//favorites
 	s.Router.HandleFunc("/wod/{wodID}/favorite", middleware.JWTMiddleware(s.handleCreateFavorite)).Methods("POST")
-	//TODO -- ADD GET ALL FAVORITES TO CHECK THAT THIS IS WORKING
+	s.Router.HandleFunc("/favoriteWods", middleware.JWTMiddleware(s.handleGetAllFavorites)).Methods("GET")
+	s.Router.HandleFunc("/wod/{wodID}/deleteFavorite", middleware.JWTMiddleware(s.handleDeleteFavorite))
+	//TODO -- CHECK THAT DELETE FAVORITE IS WORKING
 }
 
 // add Run method
