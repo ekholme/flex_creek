@@ -7,6 +7,7 @@ import (
 
 	flexcreek "github.com/ekholme/flex_creek"
 	"github.com/ekholme/flex_creek/middleware"
+	"github.com/ekholme/flex_creek/utils"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
@@ -20,7 +21,7 @@ func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -31,11 +32,11 @@ func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	err = s.UserService.CreateUser(ctx, user)
 
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, user)
+	utils.WriteJSON(w, http.StatusOK, user)
 }
 
 func (s *Server) handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
@@ -44,11 +45,11 @@ func (s *Server) handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
 	users, err := s.UserService.GetAllUsers(ctx)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, users)
+	utils.WriteJSON(w, http.StatusOK, users)
 }
 
 func (s *Server) handleGetUserByID(w http.ResponseWriter, r *http.Request) {
@@ -59,11 +60,11 @@ func (s *Server) handleGetUserByID(w http.ResponseWriter, r *http.Request) {
 	user, err := s.UserService.GetUserByID(ctx, id)
 
 	if err != nil {
-		writeJSON(w, http.StatusNotFound, err)
+		utils.WriteJSON(w, http.StatusNotFound, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, user)
+	utils.WriteJSON(w, http.StatusOK, user)
 }
 
 // TODO
@@ -81,7 +82,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&l)
 
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
@@ -90,13 +91,13 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	ref, err := s.UserService.GetUserByUsername(ctx, l.Username)
 
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
 	//ensure pw match
 	if err = validateLogin(l, ref); err != nil {
-		writeJSON(w, http.StatusUnauthorized, err)
+		utils.WriteJSON(w, http.StatusUnauthorized, err)
 		return
 	}
 
@@ -104,7 +105,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	a := middleware.CreateAuth(ref)
 
 	if middleware.GenerateToken(a); err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -120,7 +121,7 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	http.SetCookie(w, &cookie)
 
-	writeJSON(w, http.StatusOK, "logged in!")
+	utils.WriteJSON(w, http.StatusOK, "logged in!")
 }
 
 // welcome handler to ensure auth is working
@@ -129,7 +130,7 @@ func (s *Server) handleWelcome(w http.ResponseWriter, r *http.Request) {
 
 	msg := "Welcome " + claims.Username
 
-	writeJSON(w, http.StatusOK, msg)
+	utils.WriteJSON(w, http.StatusOK, msg)
 }
 
 // helper to ensure passwords match

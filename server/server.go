@@ -1,12 +1,12 @@
 package server
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
 	flexcreek "github.com/ekholme/flex_creek"
 	"github.com/ekholme/flex_creek/middleware"
+	"github.com/ekholme/flex_creek/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -39,7 +39,7 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 
 	msg["msg"] = "Welcome to Flex Creek!"
 
-	writeJSON(w, http.StatusOK, msg)
+	utils.WriteJSON(w, http.StatusOK, msg)
 }
 
 // add Register Routes method
@@ -69,9 +69,8 @@ func (s *Server) registerRoutes() {
 
 	//favorites
 	s.Router.HandleFunc("/wod/{wodID}/favorite", middleware.JWTMiddleware(s.handleCreateFavorite)).Methods("POST")
-	s.Router.HandleFunc("/favoriteWods", middleware.JWTMiddleware(s.handleGetAllFavorites)).Methods("GET")
-	s.Router.HandleFunc("/wod/{wodID}/deleteFavorite", middleware.JWTMiddleware(s.handleDeleteFavorite))
-	//TODO -- CHECK THAT DELETE FAVORITE IS WORKING
+	s.Router.HandleFunc("/favoritewods", middleware.JWTMiddleware(s.handleGetAllFavorites)).Methods("GET")
+	s.Router.HandleFunc("/wod/{wodID}/deletefavorite", middleware.JWTMiddleware(s.handleDeleteFavorite)).Methods("GET")
 }
 
 // add Run method
@@ -84,14 +83,4 @@ func (s *Server) Run() {
 	s.Srvr.Handler = s.Router
 
 	s.Srvr.ListenAndServe()
-}
-
-// helpers
-func writeJSON(w http.ResponseWriter, statusCode int, v any) {
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-
-	json.NewEncoder(w).Encode(v)
-
 }

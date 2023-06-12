@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/ekholme/flex_creek/middleware"
+	"github.com/ekholme/flex_creek/utils"
 	"github.com/gorilla/mux"
 )
 
@@ -22,20 +23,20 @@ func (s *Server) handleCreateFavorite(w http.ResponseWriter, r *http.Request) {
 	wod, err := s.WodService.GetWodByID(ctx, wid)
 
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
 	err = s.FavoriteService.CreateFavoriteWod(ctx, claims.UserID, wod)
 
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
 	msg := wod.Name + " added to favorites"
 
-	writeJSON(w, http.StatusOK, msg)
+	utils.WriteJSON(w, http.StatusOK, msg)
 }
 
 func (s *Server) handleDeleteFavorite(w http.ResponseWriter, r *http.Request) {
@@ -51,14 +52,14 @@ func (s *Server) handleDeleteFavorite(w http.ResponseWriter, r *http.Request) {
 	err := s.FavoriteService.DeleteFavoriteWod(ctx, claims.UserID, wid)
 
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
 	//eventually might want to include the wod name in this msg to the user
 	msg := "wod removed from favorites"
 
-	writeJSON(w, http.StatusOK, msg)
+	utils.WriteJSON(w, http.StatusOK, msg)
 }
 
 func (s *Server) handleGetAllFavorites(w http.ResponseWriter, r *http.Request) {
@@ -70,10 +71,10 @@ func (s *Server) handleGetAllFavorites(w http.ResponseWriter, r *http.Request) {
 	wods, err := s.FavoriteService.GetAllFavoriteWods(ctx, claims.UserID)
 
 	if err != nil {
-		writeJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, wods)
+	utils.WriteJSON(w, http.StatusOK, wods)
 
 }

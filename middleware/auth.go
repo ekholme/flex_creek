@@ -2,13 +2,13 @@ package middleware
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"net/http"
 	"os"
 	"time"
 
 	flexcreek "github.com/ekholme/flex_creek"
+	"github.com/ekholme/flex_creek/utils"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -89,9 +89,9 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		if err != nil {
 			switch {
 			case errors.Is(err, http.ErrNoCookie):
-				writeJSON(w, http.StatusBadRequest, "cookie not found")
+				utils.WriteJSON(w, http.StatusBadRequest, "cookie not found")
 			default:
-				writeJSON(w, http.StatusInternalServerError, "something went wrong")
+				utils.WriteJSON(w, http.StatusInternalServerError, "something went wrong")
 			}
 			return
 		}
@@ -99,7 +99,7 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		token, err := ValidateJWT(cookie.Value)
 
 		if err != nil {
-			writeJSON(w, http.StatusUnauthorized, err)
+			utils.WriteJSON(w, http.StatusUnauthorized, err)
 			return
 		}
 
@@ -109,14 +109,4 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 			next.ServeHTTP(w, r.WithContext(ctx))
 		}
 	}
-}
-
-// dumb to redefine this but w/e
-func writeJSON(w http.ResponseWriter, statusCode int, v any) {
-
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(statusCode)
-
-	json.NewEncoder(w).Encode(v)
-
 }

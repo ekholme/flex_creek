@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	flexcreek "github.com/ekholme/flex_creek"
+	"github.com/ekholme/flex_creek/utils"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
@@ -21,7 +22,7 @@ func (s *Server) handleCreateWod(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&wod)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -32,11 +33,11 @@ func (s *Server) handleCreateWod(w http.ResponseWriter, r *http.Request) {
 	err = s.WodService.CreateWod(ctx, wod)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, wod)
+	utils.WriteJSON(w, http.StatusOK, wod)
 
 }
 
@@ -46,11 +47,11 @@ func (s *Server) handleGetAllWods(w http.ResponseWriter, r *http.Request) {
 	wods, err := s.WodService.GetAllWods(ctx)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, wods)
+	utils.WriteJSON(w, http.StatusOK, wods)
 }
 
 func (s *Server) handleGetRandomWod(w http.ResponseWriter, r *http.Request) {
@@ -59,11 +60,11 @@ func (s *Server) handleGetRandomWod(w http.ResponseWriter, r *http.Request) {
 	wod, err := s.WodService.GetRandomWod(ctx)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, wod)
+	utils.WriteJSON(w, http.StatusOK, wod)
 }
 
 func (s *Server) handleGetWodbyID(w http.ResponseWriter, r *http.Request) {
@@ -76,11 +77,11 @@ func (s *Server) handleGetWodbyID(w http.ResponseWriter, r *http.Request) {
 	wod, err := s.WodService.GetWodByID(ctx, id)
 
 	if err != nil {
-		writeJSON(w, http.StatusNotFound, err)
+		utils.WriteJSON(w, http.StatusNotFound, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, wod)
+	utils.WriteJSON(w, http.StatusOK, wod)
 }
 
 func (s *Server) handleGetWodbyType(w http.ResponseWriter, r *http.Request) {
@@ -93,11 +94,11 @@ func (s *Server) handleGetWodbyType(w http.ResponseWriter, r *http.Request) {
 	wods, err := s.WodService.GetWodsbyType(ctx, t)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, wods)
+	utils.WriteJSON(w, http.StatusOK, wods)
 }
 
 func (s *Server) handleUpdateWod(w http.ResponseWriter, r *http.Request) {
@@ -112,18 +113,18 @@ func (s *Server) handleUpdateWod(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&wod)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
 	uWod, err := s.WodService.UpdateWod(ctx, id, wod)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
-	writeJSON(w, http.StatusOK, uWod)
+	utils.WriteJSON(w, http.StatusOK, uWod)
 
 }
 
@@ -137,7 +138,7 @@ func (s *Server) handleDeleteWod(w http.ResponseWriter, r *http.Request) {
 	err := s.WodService.DeleteWod(ctx, id)
 
 	if err != nil {
-		writeJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
 		return
 	}
 
@@ -145,6 +146,6 @@ func (s *Server) handleDeleteWod(w http.ResponseWriter, r *http.Request) {
 
 	msg["message"] = "Wod Deleted"
 
-	writeJSON(w, http.StatusOK, msg)
+	utils.WriteJSON(w, http.StatusOK, msg)
 
 }
