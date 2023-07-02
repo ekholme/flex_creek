@@ -2,6 +2,7 @@ package frstr
 
 import (
 	"context"
+	"errors"
 
 	"cloud.google.com/go/firestore"
 	flexcreek "github.com/ekholme/flex_creek"
@@ -22,7 +23,13 @@ func NewUserService(client *firestore.Client) flexcreek.UserService {
 
 // add methods
 func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) error {
-	err := hashPw(u)
+	err := us.CheckUserExists(ctx, u.Username)
+
+	if err != nil {
+		return err
+	}
+
+	err = hashPw(u)
 
 	if err != nil {
 		return err
@@ -34,6 +41,26 @@ func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) error {
 	}
 
 	return nil
+}
+
+func (us userService) CheckUserExists(ctx context.Context, un string) error {
+
+	query := us.Client.Collection(userColl).Where("Username", "==", un)
+
+	aq := *query.NewAggregationQuery().WithCount("count")
+
+	res, err := aq.Get(ctx)
+
+	if err != nil {
+		return err
+	}
+
+	if res["count"].(int) > 1 {
+		return errors.New("user already exists")
+	}
+
+	return nil
+
 }
 
 func (us userService) GetAllUsers(ctx context.Context) ([]*flexcreek.User, error) {

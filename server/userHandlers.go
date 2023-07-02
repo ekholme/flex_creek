@@ -69,7 +69,22 @@ func (s *Server) handleGetUserByID(w http.ResponseWriter, r *http.Request) {
 
 // TODO
 func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
 
+	vars := mux.Vars(r)
+
+	id := vars["userID"]
+
+	err := s.UserService.DeleteUser(ctx, id)
+
+	if err != nil {
+		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	msg := "User deleted"
+
+	utils.WriteJSON(w, http.StatusOK, msg)
 }
 
 func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {

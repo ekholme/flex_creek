@@ -58,12 +58,12 @@ func (s *Server) registerRoutes() {
 	s.Router.HandleFunc("/wod/delete/{wodID}", s.handleDeleteWod).Methods("DELETE")
 
 	//user handlers
+	//most of the user management needs to be for admins
 	s.Router.HandleFunc("/user", s.handleCreateUser).Methods("POST")
 	s.Router.HandleFunc("/login", s.handleLogin).Methods("POST")
 	s.Router.HandleFunc("/user/{userID}", s.handleGetUserByID).Methods("GET")
-	//need to make this for admins only
 	s.Router.HandleFunc("/users", s.handleGetAllUsers).Methods("GET")
-
+	s.Router.HandleFunc("/user/{userID}/delete", s.handleDeleteUser).Methods("GET")
 	//welcome
 	s.Router.HandleFunc("/o/welcome", middleware.JWTMiddleware(s.handleWelcome)).Methods("GET")
 
