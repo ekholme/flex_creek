@@ -8,6 +8,7 @@ import (
 	flexcreek "github.com/ekholme/flex_creek"
 	"github.com/ekholme/flex_creek/middleware"
 	"github.com/ekholme/flex_creek/utils"
+	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/bcrypt"
@@ -17,6 +18,8 @@ func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	var user *flexcreek.User
+
+	validate := validator.New()
 
 	err := json.NewDecoder(r.Body).Decode(&user)
 
@@ -29,6 +32,13 @@ func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 
 	user.ID = id
 
+	err = validate.Struct(user)
+
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
 	err = s.UserService.CreateUser(ctx, user)
 
 	if err != nil {
@@ -36,7 +46,9 @@ func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, http.StatusOK, user)
+	msg := "Account for " + user.Username + " created."
+
+	utils.WriteJSON(w, http.StatusOK, msg)
 }
 
 func (s *Server) handleGetAllUsers(w http.ResponseWriter, r *http.Request) {
@@ -69,6 +81,10 @@ func (s *Server) handleGetUserByID(w http.ResponseWriter, r *http.Request) {
 
 // TODO
 func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
 	vars := mux.Vars(r)
@@ -85,16 +101,22 @@ func (s *Server) handleUpdateUser(w http.ResponseWriter, r *http.Request) {
 	msg := "User deleted"
 
 	utils.WriteJSON(w, http.StatusOK, msg)
-}
-
-func (s *Server) handleDeleteUser(w http.ResponseWriter, r *http.Request) {
 
 }
 
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 	var l *flexcreek.Login
 
+	validate := validator.New()
+
 	err := json.NewDecoder(r.Body).Decode(&l)
+
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
+	err = validate.Struct(l)
 
 	if err != nil {
 		utils.WriteJSON(w, http.StatusBadRequest, err)
