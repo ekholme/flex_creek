@@ -7,6 +7,7 @@ import (
 
 	flexcreek "github.com/ekholme/flex_creek"
 	"github.com/ekholme/flex_creek/utils"
+	"github.com/go-playground/validator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
@@ -22,13 +23,24 @@ func (s *Server) handleCreateWod(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&wod)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
 	id := uuid.New().String()
 
 	wod.ID = id
+
+	validate := validator.New()
+
+	err = validate.Struct(wod)
+
+	//I should probably clean this up later to give more specific errors
+	//but this is ok for now i think
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, err)
+		return
+	}
 
 	err = s.WodService.CreateWod(ctx, wod)
 
@@ -113,7 +125,16 @@ func (s *Server) handleUpdateWod(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&wod)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err)
+		return
+	}
+
+	validate := validator.New()
+
+	err = validate.Struct(wod)
+
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, err)
 		return
 	}
 
