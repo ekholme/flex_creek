@@ -11,6 +11,11 @@ import (
 
 const userColl = "users"
 
+type UserCount struct {
+	Count struct {
+	}
+}
+
 type userService struct {
 	Client *firestore.Client
 }
@@ -23,13 +28,13 @@ func NewUserService(client *firestore.Client) flexcreek.UserService {
 
 // add methods
 func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) error {
-	err := us.CheckUserExists(ctx, u.Username)
+	// err := us.CheckUserExists(ctx, u.Username)
 
-	if err != nil {
-		return err
-	}
+	// if err != nil {
+	// 	return err
+	// }
 
-	err = hashPw(u)
+	err := hashPw(u)
 
 	if err != nil {
 		return err
@@ -45,17 +50,13 @@ func (us userService) CreateUser(ctx context.Context, u *flexcreek.User) error {
 
 func (us userService) CheckUserExists(ctx context.Context, un string) error {
 
-	query := us.Client.Collection(userColl).Where("Username", "==", un)
-
-	aq := *query.NewAggregationQuery().WithCount("count")
-
-	res, err := aq.Get(ctx)
+	users, err := us.Client.Collection(userColl).Where("Username", "==", un).Documents(ctx).GetAll()
 
 	if err != nil {
 		return err
 	}
 
-	if res["count"].(int) > 1 {
+	if len(users) > 0 {
 		return errors.New("user already exists")
 	}
 

@@ -8,7 +8,7 @@ type User struct {
 	Username string `json:"username" binding:"required" validate:"required,alphanum"`
 	Password string `json:"password" binding:"required" validate:"required,alphanum"`
 	Email    string `json:"email" validate:"required,email" binding:"required"`
-	Admin    bool   `json:"admin" validate:"boolean"`
+	Admin    bool   `json:"admin"`
 }
 
 type UserService interface {

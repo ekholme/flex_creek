@@ -24,25 +24,34 @@ func (s *Server) handleCreateUser(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&user)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	//check if a user with this name already exists
+	err = s.UserService.CheckUserExists(ctx, user.Username)
+
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	id := uuid.New().String()
 
 	user.ID = id
+	user.Admin = false
 
 	err = validate.Struct(user)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = s.UserService.CreateUser(ctx, user)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
