@@ -44,34 +44,37 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 
 // add Register Routes method
 func (s *Server) registerRoutes() {
-	//index
+	//no auth routes
 	s.Router.HandleFunc("/", handleIndex).Methods("GET")
+	s.Router.HandleFunc("/login", s.handleLogin).Methods("POST")
+	s.Router.HandleFunc("/register", s.handleCreateUser).Methods("POST")
+
+	authRouter := s.Router.PathPrefix("/o").Subrouter()
+	authRouter.Use(middleware.JWTMiddlewareTwo)
 
 	//wod handlers
-	s.Router.HandleFunc("/wod", s.handleCreateWod).Methods("POST")
-	s.Router.HandleFunc("/wod", s.handleGetAllWods).Methods("GET")
-	s.Router.HandleFunc("/randomwod", s.handleGetRandomWod).Methods("GET")
+	authRouter.HandleFunc("/wod", s.handleCreateWod).Methods("POST")
+	authRouter.HandleFunc("/wod", s.handleGetAllWods).Methods("GET")
+	authRouter.HandleFunc("/randomwod", s.handleGetRandomWod).Methods("GET")
 	//these routes are janky -- look into how people usually do this
-	s.Router.HandleFunc("/wod/{wodID}", s.handleGetWodbyID).Methods("GET")
-	s.Router.HandleFunc("/wod/type/{wodType}", s.handleGetWodbyType).Methods("GET")
-	s.Router.HandleFunc("/wodquery", s.handleGetWodsByQuery).Methods("GET")
-	s.Router.HandleFunc("/wod/update/{wodID}", s.handleUpdateWod).Methods("POST")
-	s.Router.HandleFunc("/wod/delete/{wodID}", s.handleDeleteWod).Methods("DELETE")
+	authRouter.HandleFunc("/wod/{wodID}", s.handleGetWodbyID).Methods("GET")
+	authRouter.HandleFunc("/wod/type/{wodType}", s.handleGetWodbyType).Methods("GET")
+	authRouter.HandleFunc("/wodquery", s.handleGetWodsByQuery).Methods("GET")
+	authRouter.HandleFunc("/wod/update/{wodID}", s.handleUpdateWod).Methods("POST")
+	authRouter.HandleFunc("/wod/delete/{wodID}", s.handleDeleteWod).Methods("DELETE")
 
 	//user handlers
 	//most of the user management needs to be for admins
-	s.Router.HandleFunc("/user", s.handleCreateUser).Methods("POST")
-	s.Router.HandleFunc("/login", s.handleLogin).Methods("POST")
-	s.Router.HandleFunc("/user/{userID}", s.handleGetUserByID).Methods("GET")
-	s.Router.HandleFunc("/users", s.handleGetAllUsers).Methods("GET")
-	s.Router.HandleFunc("/user/{userID}/delete", s.handleDeleteUser).Methods("GET")
+	authRouter.HandleFunc("/user/{userID}", s.handleGetUserByID).Methods("GET")
+	authRouter.HandleFunc("/users", s.handleGetAllUsers).Methods("GET")
+	authRouter.HandleFunc("/user/{userID}/delete", s.handleDeleteUser).Methods("GET")
 	//welcome
-	s.Router.HandleFunc("/o/welcome", middleware.JWTMiddleware(s.handleWelcome)).Methods("GET")
+	authRouter.HandleFunc("/o/welcome", middleware.JWTMiddleware(s.handleWelcome)).Methods("GET")
 
 	//favorites
-	s.Router.HandleFunc("/wod/{wodID}/favorite", middleware.JWTMiddleware(s.handleCreateFavorite)).Methods("POST")
-	s.Router.HandleFunc("/favoritewods", middleware.JWTMiddleware(s.handleGetAllFavorites)).Methods("GET")
-	s.Router.HandleFunc("/wod/{wodID}/deletefavorite", middleware.JWTMiddleware(s.handleDeleteFavorite)).Methods("GET")
+	authRouter.HandleFunc("/wod/{wodID}/favorite", middleware.JWTMiddleware(s.handleCreateFavorite)).Methods("POST")
+	authRouter.HandleFunc("/favoritewods", middleware.JWTMiddleware(s.handleGetAllFavorites)).Methods("GET")
+	authRouter.HandleFunc("/wod/{wodID}/deletefavorite", middleware.JWTMiddleware(s.handleDeleteFavorite)).Methods("GET")
 }
 
 // add Run method

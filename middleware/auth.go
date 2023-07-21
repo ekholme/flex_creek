@@ -110,3 +110,32 @@ func JWTMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		}
 	}
 }
+
+func JWTMiddlewareTwo(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("FLEXAUTH")
+
+		if err != nil {
+			switch {
+			case errors.Is(err, http.ErrNoCookie):
+				utils.WriteJSON(w, http.StatusBadRequest, "cookie not found")
+			default:
+				utils.WriteJSON(w, http.StatusInternalServerError, "something went wrong")
+			}
+			return
+		}
+
+		token, err := ValidateJWT(cookie.Value)
+
+		if err != nil {
+			utils.WriteJSON(w, http.StatusUnauthorized, err)
+			return
+		}
+
+		if claims, ok := token.Claims.(*CustomClaims); ok && token.Valid {
+			ctx := context.WithValue(r.Context(), "flexclaims", claims)
+
+			next.ServeHTTP(w, r.WithContext(ctx))
+		}
+	})
+}
