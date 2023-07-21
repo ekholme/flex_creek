@@ -54,6 +54,7 @@ func (s *Server) registerRoutes() {
 	//these routes are janky -- look into how people usually do this
 	s.Router.HandleFunc("/wod/{wodID}", s.handleGetWodbyID).Methods("GET")
 	s.Router.HandleFunc("/wod/type/{wodType}", s.handleGetWodbyType).Methods("GET")
+	s.Router.HandleFunc("/wodquery", s.handleGetWodsByQuery).Methods("GET")
 	s.Router.HandleFunc("/wod/update/{wodID}", s.handleUpdateWod).Methods("POST")
 	s.Router.HandleFunc("/wod/delete/{wodID}", s.handleDeleteWod).Methods("DELETE")
 

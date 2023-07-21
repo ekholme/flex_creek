@@ -17,6 +17,7 @@ type WodService interface {
 	GetAllWods(ctx context.Context) ([]*Wod, error)
 	GetWodsbyType(ctx context.Context, t string) ([]*Wod, error)
 	GetWodByID(ctx context.Context, id string) (*Wod, error)
+	GetWodsByQuery(ctx context.Context, args map[string]string) ([]*Wod, error)
 	GetRandomWod(ctx context.Context) (*Wod, error)
 	UpdateWod(ctx context.Context, id string, w *Wod) (*Wod, error)
 	DeleteWod(ctx context.Context, id string) error

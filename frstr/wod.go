@@ -170,3 +170,33 @@ func (ws wodService) DeleteWod(ctx context.Context, id string) error {
 
 	return nil
 }
+
+// wip -- want to accept arbitrary query args and return the resulting wods
+// eg want to be able to query by type or type and length or type and length and difficulty, etc.
+func (ws wodService) GetWodsByQuery(ctx context.Context, args map[string]string) ([]*flexcreek.Wod, error) {
+
+	q := ws.Client.Collection(wodColl).Query
+
+	for k, v := range args {
+		q = q.Where(k, "==", v)
+	}
+
+	docs, err := q.Documents(ctx).GetAll()
+
+	if err != nil {
+		return nil, err
+	}
+
+	wods := make([]*flexcreek.Wod, len(docs))
+
+	for k, v := range docs {
+
+		var w *flexcreek.Wod
+
+		v.DataTo(&w)
+
+		wods[k] = w
+	}
+
+	return wods, nil
+}

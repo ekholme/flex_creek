@@ -3,7 +3,9 @@ package server
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
+	"strings"
 
 	flexcreek "github.com/ekholme/flex_creek"
 	"github.com/ekholme/flex_creek/utils"
@@ -169,4 +171,38 @@ func (s *Server) handleDeleteWod(w http.ResponseWriter, r *http.Request) {
 
 	utils.WriteJSON(w, http.StatusOK, msg)
 
+}
+
+// wip -- getting wods by query
+func (s *Server) handleGetWodsByQuery(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+
+	//see for help:https://stackoverflow.com/questions/45378566/gorilla-mux-optional-query-values
+	urlParams := r.URL.Query()
+
+	m := make(map[string]string, len(urlParams))
+
+	for i, v := range urlParams {
+		if len(v) > 1 {
+			utils.WriteJSON(w, http.StatusBadRequest, errors.New("cannot handle duplicate parameters"))
+			return
+		}
+
+		s := strings.Join(v, "")
+
+		m[i] = s
+	}
+
+	//need to resolve this
+	//see https://stackoverflow.com/questions/40564842/convert-url-query-map-of-slices-to-struct-golang
+	//solution may be to decode to a Wod struct
+	//or a better option might be to make a new WodQuery struct that only contains the relevant parameters
+	wods, err := s.WodService.GetWodsByQuery(ctx, m)
+
+	if err != nil {
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	utils.WriteJSON(w, http.StatusOK, wods)
 }
