@@ -23,14 +23,14 @@ func (s *Server) handleCreateFavorite(w http.ResponseWriter, r *http.Request) {
 	wod, err := s.WodService.GetWodByID(ctx, wid)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = s.FavoriteService.CreateFavoriteWod(ctx, claims.UserID, wod)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
