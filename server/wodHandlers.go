@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	flexcreek "github.com/ekholme/flex_creek"
+	"github.com/ekholme/flex_creek/middleware"
 	"github.com/ekholme/flex_creek/utils"
 	"github.com/go-playground/validator"
 	"github.com/google/uuid"
@@ -16,9 +17,9 @@ import (
 
 // handler for wod creation
 func (s *Server) handleCreateWod(w http.ResponseWriter, r *http.Request) {
-	//making a generic context for now, although this could be something different later
-
 	ctx := context.Background()
+
+	claims := r.Context().Value("flexclaims").(*middleware.CustomClaims)
 
 	var wod *flexcreek.Wod
 
@@ -33,6 +34,8 @@ func (s *Server) handleCreateWod(w http.ResponseWriter, r *http.Request) {
 
 	wod.ID = id
 
+	wod.AddedBy = claims.Username
+
 	validate := validator.New()
 
 	err = validate.Struct(wod)
@@ -40,14 +43,14 @@ func (s *Server) handleCreateWod(w http.ResponseWriter, r *http.Request) {
 	//I should probably clean this up later to give more specific errors
 	//but this is ok for now i think
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	err = s.WodService.CreateWod(ctx, wod)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -61,7 +64,7 @@ func (s *Server) handleGetAllWods(w http.ResponseWriter, r *http.Request) {
 	wods, err := s.WodService.GetAllWods(ctx)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -74,7 +77,7 @@ func (s *Server) handleGetRandomWod(w http.ResponseWriter, r *http.Request) {
 	wod, err := s.WodService.GetRandomWod(ctx)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -91,7 +94,7 @@ func (s *Server) handleGetWodbyID(w http.ResponseWriter, r *http.Request) {
 	wod, err := s.WodService.GetWodByID(ctx, id)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusNotFound, err)
+		utils.WriteJSON(w, http.StatusNotFound, err.Error())
 		return
 	}
 
@@ -108,7 +111,7 @@ func (s *Server) handleGetWodbyType(w http.ResponseWriter, r *http.Request) {
 	wods, err := s.WodService.GetWodsbyType(ctx, t)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -127,7 +130,7 @@ func (s *Server) handleUpdateWod(w http.ResponseWriter, r *http.Request) {
 	err := json.NewDecoder(r.Body).Decode(&wod)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -136,14 +139,14 @@ func (s *Server) handleUpdateWod(w http.ResponseWriter, r *http.Request) {
 	err = validate.Struct(wod)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusBadRequest, err)
+		utils.WriteJSON(w, http.StatusBadRequest, err.Error())
 		return
 	}
 
 	uWod, err := s.WodService.UpdateWod(ctx, id, wod)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -161,7 +164,7 @@ func (s *Server) handleDeleteWod(w http.ResponseWriter, r *http.Request) {
 	err := s.WodService.DeleteWod(ctx, id)
 
 	if err != nil {
-		utils.WriteJSON(w, http.StatusInternalServerError, err)
+		utils.WriteJSON(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
@@ -177,7 +180,6 @@ func (s *Server) handleDeleteWod(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleGetWodsByQuery(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
-	//see for help:https://stackoverflow.com/questions/45378566/gorilla-mux-optional-query-values
 	urlParams := r.URL.Query()
 
 	m := make(map[string]string, len(urlParams))
@@ -193,10 +195,6 @@ func (s *Server) handleGetWodsByQuery(w http.ResponseWriter, r *http.Request) {
 		m[i] = s
 	}
 
-	//need to resolve this
-	//see https://stackoverflow.com/questions/40564842/convert-url-query-map-of-slices-to-struct-golang
-	//solution may be to decode to a Wod struct
-	//or a better option might be to make a new WodQuery struct that only contains the relevant parameters
 	wods, err := s.WodService.GetWodsByQuery(ctx, m)
 
 	if err != nil {
