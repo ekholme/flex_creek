@@ -69,12 +69,12 @@ func (s *Server) registerRoutes() {
 	authRouter.HandleFunc("/users", s.handleGetAllUsers).Methods("GET")
 	authRouter.HandleFunc("/user/{userID}/delete", s.handleDeleteUser).Methods("GET")
 	//welcome
-	authRouter.HandleFunc("/o/welcome", middleware.JWTMiddleware(s.handleWelcome)).Methods("GET")
+	authRouter.HandleFunc("/welcome", s.handleWelcome).Methods("GET")
 
 	//favorites
-	authRouter.HandleFunc("/wod/{wodID}/favorite", middleware.JWTMiddleware(s.handleCreateFavorite)).Methods("POST")
-	authRouter.HandleFunc("/favoritewods", middleware.JWTMiddleware(s.handleGetAllFavorites)).Methods("GET")
-	authRouter.HandleFunc("/wod/{wodID}/deletefavorite", middleware.JWTMiddleware(s.handleDeleteFavorite)).Methods("GET")
+	authRouter.HandleFunc("/wod/{wodID}/favorite", s.handleCreateFavorite).Methods("POST")
+	authRouter.HandleFunc("/favoritewods", s.handleGetAllFavorites).Methods("GET")
+	authRouter.HandleFunc("/wod/{wodID}/deletefavorite", s.handleDeleteFavorite).Methods("GET")
 }
 
 // add Run method

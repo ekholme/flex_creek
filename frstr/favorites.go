@@ -30,13 +30,7 @@ func (fs favoriteService) CreateFavoriteWod(ctx context.Context, userId string, 
 		return err
 	}
 
-	favs, err := fs.GetAllFavoriteWods(ctx, userId)
-
-	if err != nil {
-		return err
-	}
-
-	if err = checkAlreadyFavorite(wod.ID, favs); err != nil {
+	if err = checkAlreadyFavorite(ctx, wod.ID, fs, ref); err != nil {
 		return err
 	}
 
@@ -102,15 +96,16 @@ func (fs favoriteService) GetAllFavoriteWods(ctx context.Context, userId string)
 }
 
 // utility to check if a wod is already favorited
-// i should probably do this all in the database, but i'm going to be lazy here
-// and get all of the wods, then pass them into this utility function
-// since i already have a function to get all favorites
-func checkAlreadyFavorite(wi string, wods []*flexcreek.Wod) error {
+func checkAlreadyFavorite(ctx context.Context, wid string, fs favoriteService, uref string) error {
 
-	for _, v := range wods {
-		if wi == v.ID {
-			return errors.New("wod already favorited")
-		}
+	docs, err := fs.Client.Collection(userColl).Doc(uref).Collection(favColl).Where("ID", "==", wid).Documents(ctx).GetAll()
+
+	if err != nil {
+		return err
+	}
+
+	if len(docs) > 0 {
+		return errors.New("wod already favorited")
 	}
 
 	return nil
